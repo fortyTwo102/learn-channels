@@ -14,12 +14,23 @@
 
 <body>
 
+    <textarea id="chat-text" cols="80" rows="20"></textarea><br/>
+    <input id="input" type="text" size="80"><br/>
+    <input id="submit" type="submit" value="Send"><br/>
+
     <div id="user-hello"></div>
 
     {{ room_name|json_script:"room-name" }}
 
     <script>
-
+        document.querySelector("#submit").onclick = function (e) {
+            const messageInputDom = document.querySelector("#input");
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }))
+            messageInputDom.value = ''
+        }
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
         const chatSocket = new WebSocket(
             'ws://' +
@@ -32,8 +43,12 @@
         chatSocket.onmessage = function (e) {
             const data = JSON.parse(e.data);
             console.log(chatSocket)
-            document.querySelector('#user-hello').innerHTML = ("Welcome to room: " + data["tester"])
+            document.querySelector('#chat-text').value += (data["message"] + "\n")
         }
+
+        chatSocket.send(JSON.stringify({
+            "message": "Hello from " + roomName
+        }))
     </script>
 
     <!-- Optional JavaScript -->

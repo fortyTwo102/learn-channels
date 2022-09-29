@@ -1,3 +1,4 @@
+from email import message
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -14,14 +15,7 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'tester_message',
-                'tester': str(self.room_name),
-            }
-        )
-        
+        # print(str(self.scope["user"].get_username))
     async def tester_message(self, event):
         tester = event["tester"]
 
@@ -35,4 +29,26 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    pass
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json["message"]
+        
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'chatroom_message',
+                'message': message,
+            }
+        )
+    
+    async def chatroom_message(self, event):
+        message = event["message"]
+
+        await self.send(text_data=json.dumps({
+            'message': message,
+        }))
+
+
+
+
+    

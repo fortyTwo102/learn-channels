@@ -66,6 +66,8 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+        chat_room_data_db.pop(self.room_group_name)
+
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
